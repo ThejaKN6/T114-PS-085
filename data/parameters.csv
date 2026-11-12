@@ -1,0 +1,7 @@
+parameter,value,unit,notes
+ordering_cost,500,Rs/order,Ordering cost per order
+holding_cost,20,%,Annual holding cost as percentage of unit cost
+monthly_budget,5000000,Rs/month,Monthly purchasing budget
+shelf_life_usage,80,%,Maximum allowed usage of shelf life
+simulation_start,2026-10-01,date,Simulation start date
+simulation_end,90,days,Simulation duration
