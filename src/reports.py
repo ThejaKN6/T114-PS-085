@@ -1,11 +1,6 @@
 import csv
 
-
 def format_value(value, fieldname):
-    """
-    Format output values according to the project rules.
-    """
-
     if value is None:
         return ""
 
@@ -67,16 +62,13 @@ def format_value(value, fieldname):
 
     return str(value)
 
-
 def write_csv(filename, rows, fieldnames):
-
     with open(
         filename,
         "w",
         newline="",
         encoding="utf-8"
     ) as file:
-
         writer = csv.DictWriter(
             file,
             fieldnames=fieldnames
@@ -85,7 +77,6 @@ def write_csv(filename, rows, fieldnames):
         writer.writeheader()
 
         for row in rows:
-
             formatted_row = {}
 
             for fieldname in fieldnames:
@@ -96,9 +87,7 @@ def write_csv(filename, rows, fieldnames):
 
             writer.writerow(formatted_row)
 
-
 def write_classification_report(rows):
-
     fieldnames = [
         "sku_id",
         "annual_units",
@@ -119,9 +108,7 @@ def write_classification_report(rows):
         fieldnames
     )
 
-
 def write_seasonal_indices_report(rows):
-
     fieldnames = [
         "sku_id",
         "month_no",
@@ -134,9 +121,7 @@ def write_seasonal_indices_report(rows):
         fieldnames
     )
 
-
 def write_forecast_report(rows):
-
     fieldnames = [
         "sku_id",
         "month",
@@ -155,9 +140,7 @@ def write_forecast_report(rows):
         fieldnames
     )
 
-
 def write_recommendations_report(rows):
-
     fieldnames = [
         "date",
         "sku_id",
@@ -179,9 +162,7 @@ def write_recommendations_report(rows):
         fieldnames
     )
 
-
 def write_daily_stock_report(rows):
-
     fieldnames = [
         "date",
         "sku_id",
@@ -204,9 +185,7 @@ def write_daily_stock_report(rows):
         fieldnames
     )
 
-
 def write_kpi_report(rows):
-
     fieldnames = [
         "sku_id",
         "units_demanded",

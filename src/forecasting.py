@@ -1,16 +1,9 @@
 import math
 
-
 def calculate_seasonal_indices(demand_history):
-    """
-    Calculate seasonal index for each SKU
-    and calendar month.
-    """
-
     sku_data = {}
 
     for row in demand_history:
-
         sku_id = row["sku_id"]
         month_no = int(row["month"].split("-")[1])
         units = float(row["units"])
@@ -25,14 +18,12 @@ def calculate_seasonal_indices(demand_history):
     results = []
 
     for sku_id, values in sku_data.items():
-
         overall_average = (
             sum(units for _, units in values)
             / len(values)
         )
 
         for month_no in range(1, 13):
-
             month_values = [
                 units
                 for month, units in values
@@ -41,7 +32,6 @@ def calculate_seasonal_indices(demand_history):
 
             if overall_average == 0:
                 seasonal_index = 1.0
-
             else:
                 month_average = (
                     sum(month_values)
@@ -61,17 +51,12 @@ def calculate_seasonal_indices(demand_history):
 
     return results
 
-
 def calculate_forecast_units(
     demand_history,
     seasonal_indices,
     sku_id,
     forecast_month
 ):
-    """
-    Calculate forecast units for one SKU.
-    """
-
     history = [
         row
         for row in demand_history
@@ -110,7 +95,6 @@ def calculate_forecast_units(
         * seasonal_index
     )
 
-
 def calculate_safety_stock(
     demand_history,
     sku_id,
@@ -120,10 +104,6 @@ def calculate_safety_stock(
     z_value,
     xyz
 ):
-    """
-    Calculate safety stock.
-    """
-
     history = [
         row
         for row in demand_history
@@ -182,22 +162,16 @@ def calculate_safety_stock(
 
     return safety_stock
 
-
 def calculate_reorder_point(
     daily_demand,
     lead_time_days,
     safety_stock
 ):
-    """
-    Calculate reorder point.
-    """
-
     return math.ceil(
         daily_demand
         * lead_time_days
         + safety_stock
     )
-
 
 def calculate_order_quantity(
     abc,
@@ -206,19 +180,12 @@ def calculate_order_quantity(
     moq,
     pack_size
 ):
-    """
-    Calculate order quantity.
-    """
-
     if abc in ("A", "B"):
-
         quantity = max(
             math.ceil(eoq),
             moq
         )
-
     else:
-
         quantity = max(
             math.ceil(
                 3 * forecast_units
@@ -235,17 +202,12 @@ def calculate_order_quantity(
 
     return quantity
 
-
 def calculate_eoq(
     forecast_units,
     unit_cost,
     ordering_cost,
     holding_cost_percent
 ):
-    """
-    Calculate EOQ.
-    """
-
     holding_cost = (
         unit_cost
         * holding_cost_percent
