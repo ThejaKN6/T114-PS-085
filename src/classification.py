@@ -1,18 +1,11 @@
 import math
 
-
 def calculate_cv(values):
-    """
-    Calculate population coefficient of variation.
-    """
-
     mean = sum(values) / len(values)
-
     variance = sum(
         (value - mean) ** 2
         for value in values
     ) / len(values)
-
     standard_deviation = math.sqrt(variance)
 
     if mean == 0:
@@ -20,18 +13,12 @@ def calculate_cv(values):
 
     return standard_deviation / mean
 
-
 def get_last_months(
     demand_history,
     sku_id,
     as_of_date,
     number_of_months
 ):
-    """
-    Get the required number of history months
-    ending at the as_of_date month.
-    """
-
     as_of_month = as_of_date[:7]
 
     rows = [
@@ -47,22 +34,15 @@ def get_last_months(
 
     return rows[-number_of_months:]
 
-
 def calculate_abc_xyz(
     demand_history,
     skus,
     service_levels,
     as_of_date
 ):
-    """
-    Calculate ABC + XYZ classification
-    for every SKU.
-    """
-
     results = []
 
     for sku in skus:
-
         sku_id = sku["sku_id"]
 
         history_12 = get_last_months(
@@ -121,14 +101,6 @@ def calculate_abc_xyz(
     return results
 
 def add_abc_class(results):
-    """
-    Add ABC class using annual consumption value.
-
-    A: cumulative share BEFORE the SKU < 70%
-    B: cumulative share BEFORE the SKU < 90%
-    C: otherwise
-    """
-
     results.sort(
         key=lambda row: (
             -row["annual_value"],
@@ -144,7 +116,6 @@ def add_abc_class(results):
     cumulative_value = 0
 
     for row in results:
-
         previous_share = (
             cumulative_value / total_value
             if total_value > 0
@@ -159,7 +130,6 @@ def add_abc_class(results):
             abc = "C"
 
         cumulative_value += row["annual_value"]
-
         row["abc"] = abc
 
         row["cum_share_pct"] = (
@@ -172,22 +142,16 @@ def add_abc_class(results):
 
     return results
 
-
 def add_service_levels(
     results,
     service_levels
 ):
-    """
-    Add class code, service level and z-value.
-    """
-
     service_lookup = {
         row["class_code"]: row
         for row in service_levels
     }
 
     for row in results:
-
         class_code = (
             row["abc"] + row["xyz"]
         )
@@ -208,17 +172,12 @@ def add_service_levels(
 
     return results
 
-
 def build_classification(
     demand_history,
     skus,
     service_levels,
     as_of_date
 ):
-    """
-    Build the final classification table.
-    """
-
     results = calculate_abc_xyz(
         demand_history,
         skus,
