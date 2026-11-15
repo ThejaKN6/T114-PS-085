@@ -35,44 +35,19 @@ from src.reports import (
     write_kpi_report
 )
 
-
-# ---------------------------------------------------------
-# BASIC HELPERS
-# ---------------------------------------------------------
-
 def make_lookup(rows, key):
-    """
-    Create a dictionary using one column as the key.
-    """
-
     return {
         row[key]: row
         for row in rows
     }
 
-
 def get_parameter(parameters, name):
-    """
-    Get one parameter value from parameters.csv.
-    """
-
     for row in parameters:
-
         if row["parameter"] == name:
             return row["value"]
-
     return None
 
-
-# ---------------------------------------------------------
-# LOAD ALL INPUT DATA
-# ---------------------------------------------------------
-
 def load_data():
-    """
-    Load all input CSV files and commands.txt.
-    """
-
     suppliers = load_csv(
         "data/suppliers.csv"
     )
@@ -114,7 +89,6 @@ def load_data():
         "data/commands.txt",
         encoding="utf-8"
     ) as file:
-
         commands = [
             line.strip()
             for line in file
@@ -134,10 +108,6 @@ def load_data():
         commands
     )
 
-# ---------------------------------------------------------
-# BUILD FORECAST PLAN
-# ---------------------------------------------------------
-
 def build_forecast_plan(
     demand_history,
     skus,
@@ -145,18 +115,11 @@ def build_forecast_plan(
     seasonal_indices,
     forecast_month
 ):
-    """
-    Build one forecast row for every SKU.
-    """
-
     ordering_cost = 500
-
     holding_cost_percent = 20
-
     results = []
 
     for sku in skus:
-
         sku_id = sku["sku_id"]
 
         forecast_units = calculate_forecast_units(
@@ -222,15 +185,12 @@ def build_forecast_plan(
         )
 
         if shelf_life_days > 0:
-
             shelf_cap = math.floor(
                 daily_demand
                 * 0.8
                 * shelf_life_days
             )
-
         else:
-
             shelf_cap = 0
 
         results.append({
@@ -247,19 +207,10 @@ def build_forecast_plan(
 
     return results
 
-# ---------------------------------------------------------
-# KPI REPORT
-# ---------------------------------------------------------
-
 def build_kpi_report(
     daily_rows,
     skus
 ):
-    """
-    Build KPI report for every SKU
-    and one TOTAL row.
-    """
-
     sku_lookup = make_lookup(
         skus,
         "sku_id"
@@ -267,9 +218,7 @@ def build_kpi_report(
 
     kpi = {}
 
-    # Initialize KPI data for every SKU
     for sku in skus:
-
         sku_id = sku["sku_id"]
 
         kpi[sku_id] = {
@@ -283,9 +232,7 @@ def build_kpi_report(
             "days": 0
         }
 
-    # Calculate daily KPI values
     for row in daily_rows:
-
         sku_id = row["sku_id"]
 
         if sku_id not in kpi:
@@ -302,26 +249,18 @@ def build_kpi_report(
             sku_lookup[sku_id]["unit_cost"]
         )
 
-        # Units demanded
         data["units_demanded"] += demand
-
-        # Units shipped on the same day
         data["units_shipped_same_day"] += shipped
 
-        # A stockout day is a day where demand
-        # was greater than same-day shipment
         if demand > shipped:
             data["stockout_days"] += 1
 
-        # Expired units
         data["expired_units"] += expired
 
-        # Expired inventory value
         data["expired_value"] += (
             expired * unit_cost
         )
 
-        # Closing inventory value
         data["inventory_value_total"] += (
             closing_stock * unit_cost
         )
@@ -330,7 +269,6 @@ def build_kpi_report(
 
     results = []
 
-    # TOTAL values
     total_demand = 0
     total_shipped = 0
     total_stockout_days = 0
@@ -339,14 +277,10 @@ def build_kpi_report(
     total_inventory_value = 0.0
     total_days = 0
 
-    # Build one KPI row per SKU
     for sku in skus:
-
         sku_id = sku["sku_id"]
-
         data = kpi[sku_id]
 
-        # Fill rate
         if data["units_demanded"] > 0:
             fill_rate = (
                 data["units_shipped_same_day"]
@@ -356,7 +290,6 @@ def build_kpi_report(
         else:
             fill_rate = 100.0
 
-        # Average inventory value
         if data["days"] > 0:
             avg_inventory_value = (
                 data["inventory_value_total"]
@@ -378,7 +311,6 @@ def build_kpi_report(
                 avg_inventory_value
         })
 
-        # Add to TOTAL
         total_demand += data["units_demanded"]
         total_shipped += data["units_shipped_same_day"]
         total_stockout_days += data["stockout_days"]
@@ -387,7 +319,6 @@ def build_kpi_report(
         total_inventory_value += data["inventory_value_total"]
         total_days += data["days"]
 
-    # TOTAL fill rate
     if total_demand > 0:
         total_fill_rate = (
             total_shipped
@@ -397,7 +328,6 @@ def build_kpi_report(
     else:
         total_fill_rate = 100.0
 
-    # TOTAL average inventory value
     if total_days > 0:
         total_avg_inventory = (
             total_inventory_value
@@ -406,7 +336,6 @@ def build_kpi_report(
     else:
         total_avg_inventory = 0.0
 
-    # Add TOTAL row
     results.append({
         "sku_id": "TOTAL",
         "units_demanded": total_demand,
@@ -419,15 +348,8 @@ def build_kpi_report(
     })
 
     return results
-# ---------------------------------------------------------
-# PRINT CLASSIFICATION
-# ---------------------------------------------------------
 
 def print_classification(rows):
-    """
-    Print classification results with column names.
-    """
-
     print()
     print("=" * 160)
     print("CLASSIFICATION")
@@ -440,7 +362,6 @@ def print_classification(rows):
     )
 
     for row in rows:
-
         print(
             row["sku_id"], "|",
             f'{row["annual_units"]:.0f}', "|",
@@ -455,9 +376,6 @@ def print_classification(rows):
             f'{row["z_value"]:.2f}'
         )
 
-# ---------------------------------------------------------
-# PRINT SEASONAL INDICES
-# ---------------------------------------------------------
 def print_seasonal_indices(rows):
     print()
     print("=" * 70)
@@ -475,22 +393,19 @@ def print_seasonal_indices(rows):
             f'{row["seasonal_index"]:.4f}'
         )
 
-#-------------------------------------------
-# print forecast
-#------------------------------------------ 
 def print_forecast(rows):
-        print()
-        print("=" * 120)
-        print("FORECAST PLAN")
-        print("=" * 120)
+    print()
+    print("=" * 120)
+    print("FORECAST PLAN")
+    print("=" * 120)
 
+    print(
+        "SKU_ID | MONTH | FORECAST_UNITS | DAILY_DEMAND | "
+        "SAFETY_STOCK | REORDER_POINT | EOQ | ORDER_QTY | SHELF_CAP"
+    )
+
+    for row in rows:
         print(
-            "SKU_ID | MONTH | FORECAST_UNITS | DAILY_DEMAND | "
-            "SAFETY_STOCK | REORDER_POINT | EOQ | ORDER_QTY | SHELF_CAP"
-        )
-        
-        for row in rows:
-            print(
             row["sku_id"], "|",
             row["month"], "|",
             f'{row["forecast_units"]:.2f}', "|",
@@ -502,17 +417,7 @@ def print_forecast(rows):
             row["shelf_cap"]
         )
 
-# ---------------------------------------------------------
-# PRINT RECOMMENDATIONS
-# ---------------------------------------------------------
-
-def print_recommendations(
-    rows
-):
-    """
-    Print reorder recommendations.
-    """
-
+def print_recommendations(rows):
     print()
     print("=" * 120)
     print("RECOMMENDATIONS")
@@ -527,7 +432,6 @@ def print_recommendations(
     )
 
     for row in rows:
-
         print(
             row["date"],
             "|",
@@ -554,18 +458,7 @@ def print_recommendations(
             f'{row["budget_remaining_after"]:.2f}'
         )
 
-
-# ---------------------------------------------------------
-# PRINT KPI
-# ---------------------------------------------------------
-
-def print_kpi(
-    rows
-):
-    """
-    Print KPI results.
-    """
-
+def print_kpi(rows):
     print()
     print("=" * 110)
     print("KPI REPORT")
@@ -580,7 +473,6 @@ def print_kpi(
     print("-" * 110)
 
     for row in rows:
-
         print(
             row["sku_id"],
             "|",
@@ -599,10 +491,6 @@ def print_kpi(
             f'{row["avg_inventory_value"]:.2f}'
         )
 
-# ---------------------------------------------------------
-# PROCESS COMMANDS
-# ---------------------------------------------------------
-
 def process_commands(
     commands,
     sku_lookup,
@@ -618,17 +506,12 @@ def process_commands(
     monthly_budget,
     shelf_life_usage
 ):
-    """
-    Process commands from commands.txt.
-    """
-
     daily_rows = []
     recommendations = []
     forecast_plans = []
     budget_used = 0
 
     for command in commands:
-
         command = command.strip()
 
         if not command:
@@ -644,12 +527,7 @@ def process_commands(
 
         command_name = parts[0]
 
-        # -------------------------------------------------
-        # CLASSIFY
-        # -------------------------------------------------
-
         if command_name == "CLASSIFY":
-
             as_of_date = parts[1]
 
             classification = build_classification(
@@ -666,12 +544,7 @@ def process_commands(
                 classification
             )
 
-        # -------------------------------------------------
-        # SEASONAL INDEX
-        # -------------------------------------------------
-
         elif command_name == "SEASONAL_INDEX":
-
             seasonal_indices = calculate_seasonal_indices(
                 demand_history
             )
@@ -680,12 +553,7 @@ def process_commands(
                 seasonal_indices
             )
 
-        # -------------------------------------------------
-        # FORECAST
-        # -------------------------------------------------
-
         elif command_name == "FORECAST":
-
             forecast_month = parts[1]
 
             forecast_plan = build_forecast_plan(
@@ -709,32 +577,19 @@ def process_commands(
                 forecast_plan
             )
 
-        # -------------------------------------------------
-        # RUN DAY
-        # -------------------------------------------------
-
         elif command_name == "RUN_DAY":
-
             current_date = to_date(
                 parts[1]
             )
 
-            # Reset monthly budget
-            # on the first day.
             if current_date.day == 1:
                 budget_used = 0
 
-            # Save TRUE opening stock
-            # before today's processing.
             opening_stock = save_opening_stock(
                 sku_lookup,
                 stock
             )
 
-            # Process:
-            # 1. expiry
-            # 2. receipts
-            # 3. demand
             result = simulate_day(
                 current_date,
                 daily_demand,
@@ -744,8 +599,6 @@ def process_commands(
                 sku_lookup
             )
 
-            # Check reorder requirements
-            # after today's demand.
             day_recommendations = add_reorder_to_day(
                 current_date,
                 sku_lookup,
@@ -755,10 +608,6 @@ def process_commands(
                 forecast_lookup
             )
 
-            # Apply:
-            # 1. shelf life
-            # 2. consolidation
-            # 3. budget
             (
                 day_recommendations,
                 budget_remaining
@@ -771,13 +620,11 @@ def process_commands(
                 shelf_life_usage
             )
 
-            # Update budget usage.
             budget_used = (
                 monthly_budget
                 - budget_remaining
             )
 
-            # Place funded orders.
             place_funded_orders(
                 current_date,
                 day_recommendations,
@@ -785,12 +632,10 @@ def process_commands(
                 sku_lookup
             )
 
-            # Save recommendations.
             recommendations.extend(
                 day_recommendations
             )
 
-            # Create daily stock rows.
             rows = create_daily_stock_rows(
                 current_date,
                 sku_lookup,
@@ -804,42 +649,22 @@ def process_commands(
                 rows
             )
 
-        # -------------------------------------------------
-        # PRINT CLASSIFICATION
-        # -------------------------------------------------
-
         elif command_name == "PRINT_CLASSIFICATION":
-
             print_classification(
                 list(sku_lookup.values())
             )
 
-        # -------------------------------------------------
-        # PRINT SEASONAL INDICES
-        # -------------------------------------------------
-
         elif command_name == "PRINT_SEASONAL_INDICES":
-
             print_seasonal_indices(
                 seasonal_indices
             )
 
-        # -------------------------------------------------
-        # PRINT RECOMMENDATIONS
-        # -------------------------------------------------
-
         elif command_name == "PRINT_RECOMMENDATIONS":
-
             print_recommendations(
                 recommendations
             )
 
-        # -------------------------------------------------
-        # PRINT KPI
-        # -------------------------------------------------
-
         elif command_name == "PRINT_KPI":
-
             kpi_rows = build_kpi_report(
                 daily_rows,
                 skus
@@ -856,12 +681,8 @@ def process_commands(
         seasonal_indices,
         forecast_plans
     )
-# ---------------------------------------------------------
-# MAIN PROGRAM
-# ---------------------------------------------------------
 
 def main():
-
     print("Loading input data...")
 
     (
@@ -876,13 +697,11 @@ def main():
         commands
     ) = load_data()
 
-    # Create SKU lookup.
     sku_lookup = make_lookup(
         skus,
         "sku_id"
     )
 
-    # Read project parameters.
     monthly_budget = float(
         get_parameter(
             parameters,
@@ -909,12 +728,9 @@ def main():
         )
     )
 
-    # Convert percentage such as 80
-    # into 0.80 if required.
     if shelf_life_usage > 1:
         shelf_life_usage /= 100
 
-    # Build initial classification.
     classification = build_classification(
         demand_history,
         skus,
@@ -923,12 +739,10 @@ def main():
     )
 
     for row in classification:
-
         sku_lookup[
             row["sku_id"]
         ].update(row)
 
-    # Build seasonal indices.
     seasonal_indices = (
         calculate_seasonal_indices(
             demand_history
@@ -938,22 +752,16 @@ def main():
     forecast_lookup = {}
     forecast_plans = []
 
-    # Make copies so the original
-    # loaded input data is not changed.
     stock = []
 
     for row in opening_stock:
-
         stock.append({
             "batch_id":
                 row["batch_id"],
-
             "sku_id":
                 row["sku_id"],
-
             "quantity":
                 int(row["quantity"]),
-
             "received_date":
                 row["received_date"]
         })
@@ -961,27 +769,21 @@ def main():
     open_orders_copy = []
 
     for row in open_orders:
-
         open_orders_copy.append({
             "po_id":
                 row["po_id"],
-
             "sku_id":
                 row["sku_id"],
-
             "quantity":
                 int(row["quantity"]),
-
             "order_date":
                 row["order_date"],
-
             "expected_receipt_date":
                 row["expected_receipt_date"]
         })
 
     backorders = {}
 
-    # Process commands.
     (
         daily_rows,
         recommendations,
@@ -1004,13 +806,11 @@ def main():
         shelf_life_usage
     )
 
-    # Build final KPI report.
     kpi_rows = build_kpi_report(
         daily_rows,
         skus
     )
 
-    # Write final output files.
     write_classification_report(
         classification
     )
@@ -1041,10 +841,6 @@ def main():
     print("Output files created.")
     print("=" * 60)
 
-
-# ---------------------------------------------------------
-# START PROGRAM
-# ---------------------------------------------------------
 
 if __name__ == "__main__":
     main()
