@@ -140,3 +140,8 @@ The KPI report contains:
 - Average inventory value
 
 A TOTAL row is included in the KPI report.
+
+
+[Watch the 5-Minute Demo Video]
+
+https://drive.google.com/file/d/1svYjASR9ZNWj7ue-WYZeRjvyLc0WYMNf/view?usp=drivesdk
